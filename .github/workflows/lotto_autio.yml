@@ -1,0 +1,37 @@
+name: Lotto Prediction Automation
+
+on:
+  schedule:
+    # 한국 시간 월요일 09:00 (UTC 00:00)
+    - cron: '0 0 * * 1'
+  workflow_dispatch: # 수동 실행 버튼
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          pip install requests pandas numpy notion-client tensorflow
+
+      - name: Run Prediction Script
+        env:
+          NOTION_TOKEN: ${{ secrets.ntn_c2880234892b9UGEKjQd6YFh9pBiDTsnKT4JDp7GWKc7uK }}
+          NOTION_DATABASE_ID: ${{ secrets.3020abac-e58c-8043-88c2-000bc86ed5c4 }}
+        run: python main.py
+
+      - name: Commit and Push CSV Update
+        run: |
+          git config --global user.name "LottoBot"
+          git config --global user.email "bot@github.com"
+          git add lotto.csv
+          git commit -m "Update lotto data [skip ci]" || echo "No changes to commit"
+          git push
