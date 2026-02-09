@@ -24,8 +24,8 @@ jobs:
 
       - name: Run Prediction Script
         env:
-          NOTION_TOKEN: ${{ secrets.ntn_c2880234892b9UGEKjQd6YFh9pBiDTsnKT4JDp7GWKc7uK }}
-          NOTION_DATABASE_ID: ${{ secrets.3020abac-e58c-8043-88c2-000bc86ed5c4 }}
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
         run: python main.py
 
       - name: Commit and Push CSV Update
