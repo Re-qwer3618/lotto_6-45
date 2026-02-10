@@ -11,15 +11,29 @@ def update_data(file_path):
     df = pd.read_csv(file_path, header=None)
     last_no = int(df.iloc[-1, 0])
     next_no = last_no + 1
+    
+    # 브라우저처럼 보이게 만드는 헤더 추가 (차단 방지)
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+    }
     url = f"https://www.dhlottery.co.kr/common.do?method=getLottoNumber&drwNo={next_no}"
-    res = requests.get(url).json()
-    if res.get('returnValue') == 'success':
-        # 회차, 번호1~6, 보너스, 당첨금 순서
-        new_row = [next_no, res['drwtNo1'], res['drwtNo2'], res['drwtNo3'], 
-                   res['drwtNo4'], res['drwtNo5'], res['drwtNo6'], res['bnusNo'], res['firstAccumamnt']]
-        df.loc[len(df)] = new_row
-        df.to_csv(file_path, index=False, header=False)
-        return True, next_no
+    
+    try:
+        response = requests.get(url, headers=headers)
+        # 응답이 성공(200)일 때만 JSON 변환 시도
+        if response.status_code == 200:
+            res = response.json()
+            if res.get('returnValue') == 'success':
+                new_row = [next_no, res['drwtNo1'], res['drwtNo2'], res['drwtNo3'], 
+                           res['drwtNo4'], res['drwtNo5'], res['drwtNo6'], res['bnusNo'], res['firstAccumamnt']]
+                df.loc[len(df)] = new_row
+                df.to_csv(file_path, index=False, header=False)
+                print(f"{next_no}회차 업데이트 성공")
+                return True, next_no
+        print("새로운 회차 정보가 아직 없거나 사이트 접근이 제한되었습니다.")
+    except Exception as e:
+        print(f"데이터 수집 중 오류 발생: {e}")
+        
     return False, last_no
 
 # 2. 딥러닝 예측 로직
